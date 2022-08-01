@@ -415,7 +415,7 @@ app.get("/users/sort/name/:key", async (req, res) => {
 
 //update
 
-app.post("/users/:id",async(req,res)=>{
+app.patch("/users/:id",async(req,res)=>{
   try{
     const _id=req.params.id;
     const updateUser=await User.findByIdAndUpdate(_id,req.body,{new:true});
