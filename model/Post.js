@@ -22,7 +22,7 @@ const userSchema = new Schema({
     }  
   },
   contact_no: {
-    type:Number,
+    type:String,
     required:true,
     notEmpty: true,
     errorMessage: "Phone number cannot be empty"
