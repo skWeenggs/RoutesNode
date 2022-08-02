@@ -62,10 +62,9 @@ app.post("/add", async (req, res) => {
 
     await User.create(newUser);
 
-    res.status(201).send(newUser);
+    res.send(newUser);
   } catch (err) {
     console.log("error", err);
-    res.status(400).send(err);
     res.status(500).json({error:true,massage:"Internal Server Error"});
   }
 });
@@ -108,10 +107,11 @@ app.get("/posts", async (req, res) => {
 
 // app.get("/users", paginatedresult(User), async(req, res) => {
 app.get("/users", async(req, res,next) => {
-  const page = parseInt(req.query.page || 0 ); //    .../page=2
+  const page = parseInt(req.query.page ); //    .../page=2
   const limit = parseInt(req.query.limit||10); // .../limit=10
   const sort= req.query.sort ;
-  console.log("sort type",sort);
+  const value=req.query.value;
+  console.log("page-----",page,sort);
   var userCount ,totalPages,currentpage;
   var sortData;
   const startIndex = (page + 1) * limit;
@@ -136,7 +136,6 @@ app.get("/users", async(req, res,next) => {
 
     // results.results = await model
     const userData = await User
-      // .find({})
       .find(q ? {
         "$or":[
           {name:{$regex:`${q}`}},
@@ -171,29 +170,106 @@ app.get("/users", async(req, res,next) => {
         currentpage= Math.ceil(userCount.length % page)
       }
 
-      if(sort == 'asc'){
+      if(value=='name' && sort == 'asc'){
         console.log("call")
           sortData = await User.find().sort({
           name: 1,
+
         })
         .limit(limit)
         .skip(limit * page);
         console.log("asc",sortData);
         // res.send(sortData);
-      }else if(sort=='desc'){
+      }else if(value==='name' && sort=='desc'){
           sortData = await User.find().sort({
           name: -1,
+
         })
         .limit(limit)
         .skip(limit * page);
         console.log("desc",sortData);
-        totalPages=Math.ceil(sortData.length / limit)
-        currentpage= Math.ceil(sortData.length % page)
         // res.send(sortData)
-      }
+      }else if(value=='email' && sort == 'asc'){
+        console.log("call")
+          sortData = await User.find().sort({
+          email: 1,
+        })
+        .limit(limit)
+        .skip(limit * page);
+        console.log("asc",sortData);
+        // res.send(sortData);
+      }else if(value==='email' && sort=='desc'){
+        sortData = await User.find().sort({
+        email: -1,
+      })
+      .limit(limit)
+      .skip(limit * page);
+      console.log("desc",sortData);
+      // res.send(sortData)
+    }else if(value==='city' && sort=='asc'){
+      sortData = await User.find().sort({
+      city: 1,
+
+    })
+    .limit(limit)
+    .skip(limit * page);
+    console.log("asc",sortData);
+    // res.send(sortData)
+  }else if(value==='city' && sort=='desc'){
+    sortData = await User.find().sort({
+    city: -1,
+
+  })
+  .limit(limit)
+  .skip(limit * page);
+  console.log("desc",sortData);
+  // res.send(sortData)
+  }else{
+    console.log("wronge");
+  }
 
 
-      if(q && sort=='asc'){
+      // if(q && sort=='asc'){
+      //   userCount=await User.find(q ? {
+      //     "$or":[
+      //       {name:{$regex:`${q}`}},
+      //       {city:{$regex:`${q}`}},
+      //       {email:{$regex:`${q}`}},
+      //       {message:{$regex:`${q}`}},
+      //       {contact_no:{$regex:`${q}`}},
+      //     ]
+      //   }:{}
+      //   )
+      //   .sort({
+      //     name: 1,
+      //   })
+      //   .limit(limit)
+      //   .skip(limit * page);
+      //   console.log("querydata----",userCount);
+      //   totalPages=Math.ceil(userCount.length / limit)
+      //   currentpage= Math.ceil(userCount.length % page)
+      // }else if(q && sort=='desc'){
+      //   userCount=await User.find(q ? {
+      //     "$or":[
+      //       {name:{$regex:`${q}`}},
+      //       {city:{$regex:`${q}`}},
+      //       {email:{$regex:`${q}`}},
+      //       {message:{$regex:`${q}`}},
+      //       {contact_no:{$regex:`${q}`}},
+      //     ]
+      //   }:{}
+      //   )
+      //   .sort({
+      //     name: -1,
+      //   })
+      //   .limit(limit)
+      //   .skip(limit * page);
+      //   console.log("querydata----",userCount);
+      //   totalPages=Math.ceil(userCount.length / limit)
+      //   currentpage= Math.ceil(userCount.length % page)
+      // }
+      
+      if(q && value==='name' && sort=='asc'){
         userCount=await User.find(q ? {
           "$or":[
             {name:{$regex:`${q}`}},
@@ -205,14 +281,14 @@ app.get("/users", async(req, res,next) => {
         }:{}
         )
         .sort({
-          name: 1,
+          name:1,
         })
         .limit(limit)
         .skip(limit * page);
         console.log("querydata----",userCount);
         totalPages=Math.ceil(userCount.length / limit)
         currentpage= Math.ceil(userCount.length % page)
-      }else if(q && sort=='desc'){
+      }else if(q && value==='name' && sort=='desc'){
         userCount=await User.find(q ? {
           "$or":[
             {name:{$regex:`${q}`}},
@@ -224,14 +300,90 @@ app.get("/users", async(req, res,next) => {
         }:{}
         )
         .sort({
-          name: -1,
+           name:-1,
         })
         .limit(limit)
         .skip(limit * page);
         console.log("querydata----",userCount);
         totalPages=Math.ceil(userCount.length / limit)
         currentpage= Math.ceil(userCount.length % page)
-      }
+      }else if(q && value==='email' && sort=='asc'){
+        userCount=await User.find(q ? {
+          "$or":[
+            {name:{$regex:`${q}`}},
+            {city:{$regex:`${q}`}},
+            {email:{$regex:`${q}`}},
+            {message:{$regex:`${q}`}},
+            {contact_no:{$regex:`${q}`}},
+          ]
+        }:{}
+        )
+        .sort({
+          email: 1,        
+        })
+        .limit(limit)
+        .skip(limit * page);
+        console.log("querydata----",userCount);
+        totalPages=Math.ceil(userCount.length / limit)
+        currentpage= Math.ceil(userCount.length % page)
+      }else if(q && value==='email'&& sort=='desc'){
+        userCount=await User.find(q ? {
+          "$or":[
+            {name:{$regex:`${q}`}},
+            {city:{$regex:`${q}`}},
+            {email:{$regex:`${q}`}},
+            {message:{$regex:`${q}`}},
+            {contact_no:{$regex:`${q}`}},
+          ]
+        }:{}
+        )
+        .sort({
+           email:-1,
+        })
+        .limit(limit)
+        .skip(limit * page);
+        console.log("querydata----",userCount);
+        totalPages=Math.ceil(userCount.length / limit)
+        currentpage= Math.ceil(userCount.length % page)
+      }else if(q && value==='city' && sort=='asc'){
+        userCount=await User.find(q ? {
+          "$or":[
+            {name:{$regex:`${q}`}},
+            {city:{$regex:`${q}`}},
+            {email:{$regex:`${q}`}},
+            {message:{$regex:`${q}`}},
+            {contact_no:{$regex:`${q}`}},
+          ]
+        }:{}
+        )
+        .sort({
+        city:1,
+        })
+        .limit(limit)
+        .skip(limit * page);
+        console.log("querydata----",userCount);
+        totalPages=Math.ceil(userCount.length / limit)
+        currentpage= Math.ceil(userCount.length % page)
+      }else if(q && value==='city'&& sort=='desc'){
+        userCount=await User.find(q ? {
+          "$or":[
+            {name:{$regex:`${q}`}},
+            {city:{$regex:`${q}`}},
+            {email:{$regex:`${q}`}},
+            {message:{$regex:`${q}`}},
+            {contact_no:{$regex:`${q}`}},
+          ]
+        }:{}
+        )
+        .sort({
+           city:-1,
+        })
+        .limit(limit)
+        .skip(limit * page);
+        console.log("querydata----",userCount);
+        totalPages=Math.ceil(userCount.length / limit)
+        currentpage= Math.ceil(userCount.length % page)
+      }else{console.log("choice wronge");}
 
     // res.paginatedResults = results;
       res.status(200).send({
@@ -413,8 +565,6 @@ app.get("/users/sort/name/:key", async (req, res) => {
 
 // });
 
-//update
-
 app.patch("/users/:id",async(req,res)=>{
   try{
     const _id=req.params.id;
@@ -425,8 +575,6 @@ app.patch("/users/:id",async(req,res)=>{
     res.status(404).send(updateUser);
   }
 })  
-
-//delete 
 
 app.delete("/users/:id",async(req,res)=>{
   try{
